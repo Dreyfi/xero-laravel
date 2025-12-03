@@ -11,6 +11,15 @@ class XeroAccess extends Model
 
     protected $table = 'xero_access';
 
+    protected $fillable = [
+        'refresh_token',
+        'token',
+        'tenant_id',
+        'tenant_name',
+        'purpose',
+        'expires_at',
+    ];
+
     protected $guarded = [];
 
     protected $casts = [

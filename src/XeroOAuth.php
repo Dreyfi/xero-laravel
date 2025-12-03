@@ -71,12 +71,42 @@ class XeroOAuth
         DB::transaction(function () {
             XeroAccess::setAllObsolete();
 
-            $this->credentials = XeroAccess::create([
-                'refresh_token' => $this->token->getRefreshToken(),
-                'token' => $this->token->getToken(),
-                'tenant_id' => collect($this->tenants)->pluck('tenantId')->first(),
-                'expires_at' => now()->addMinutes(29),
-            ]);
+            foreach ($this->tenants as $tenant) {
+                XeroAccess::create([
+                    'refresh_token' => $this->token->getRefreshToken(),
+                    'token' => $this->token->getToken(),
+                    'tenant_id' => $tenant->tenantId,
+                    'tenant_name' => $tenant->tenantName ?? null,
+                    'purpose' => null,
+                    'expires_at' => now()->addMinutes(29),
+                ]);
+            }
+
+            $this->credentials = XeroAccess::latest();
         });
+    }
+
+    public function getTenants(): array
+    {
+        return $this->tenants ?? [];
+    }
+
+    public function getCredentials(?string $tenantId = null)
+    {
+        if ($tenantId) {
+            $matched = XeroAccess::where('tenant_id', $tenantId)
+                ->orderByDesc('created_at')
+                ->first();
+
+            if ($matched) {
+                return $this->credentials = $matched;
+            }
+        }
+
+        if (! $this->credentials) {
+            $this->credentials = XeroAccess::latest();
+        }
+
+        return $this->credentials;
     }
 }

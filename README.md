@@ -92,6 +92,16 @@ $contacts = Xero::contacts()->find([
     '34xxxx6e-7xx5-2xx4-bxx5-6123xxxxea49',
     '364xxxx7f-2xx3-7xx3-gxx7-6726xxxxhe76',
 ]);
+
+# Switch between connected Xero organisations
+$tenantId = request('tenant_id');
+$contacts = Xero::forTenant($tenantId)->contacts()->get();
+
+# Look up the organisation profile for a tenant
+$organisation = Xero::forTenant($tenantId)->organisations()->first();
+
+# Retrieve the raw tenant list after authorisation
+$tenants = app(\AylesSoftware\XeroLaravel\XeroOAuth::class)->getTenants();
 ```
 
 For more information on usage checkout https://github.com/calcinai/xero-php.
